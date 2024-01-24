@@ -8,11 +8,16 @@ from utils import (
     load_csrf_token
 )
 
+from errors import NotLoggedInError
+
 
 class StravaScraper:
 
-    COOKIES_PATH = './strava_scrapper/cookies.txt'
-    LOGIN_URL = 'https://www.strava.com/login'
+    COOKIES_PATH = "./strava_scrapper/cookies.txt"
+    LOGIN_URL = "https://www.strava.com/login"
+    SESSION_URL = "https://www.strava.com/session"
+    DASHBOARD_URL = "https://www.strava.com/dashboard"
+    ONBOARD_URL =  "https://www.strava.com/onboarding"
 
     def __init__(
         self, 
@@ -43,11 +48,11 @@ class StravaScraper:
     
         response = get_request(self._session, self.LOGIN_URL, allow_redirects=True)
         soup = BeautifulSoup(response.text, 'lxml')
-        csrf_token = load_csrf_token(soup)
+        csrf_token = load_csrf_token(soup) # what if CsrfTokenNotFoundError is raised?
         data = self.__get_session_data(csrf_token)
         response = post_request(
             self._session, 
-            'https://www.strava.com/session', 
+            self.SESSION_URL, 
             allow_redirects=False, 
             data=data
         )
@@ -56,15 +61,12 @@ class StravaScraper:
         return True
     
     def __check_if_logged_in(self) -> bool:
-        url = "https://www.strava.com/dashboard"
-        response = get_request(self._session, url, allow_redirects=True)
-        if not response.url == "https://www.strava.com/onboarding":
-            raise Exception("User not logged in")
+        response = get_request(self._session, self.DASHBOARD_URL, allow_redirects=True)
+        print(response.url)
+        if not response.url == self.ONBOARD_URL:
+            raise NotLoggedInError
 
     def login(self) -> None:
-
         self._session = requests.Session()
         result = self.__load_cookies()
         self.__check_if_logged_in()
-
-        print('Logged in!')

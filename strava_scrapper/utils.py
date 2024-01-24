@@ -1,6 +1,7 @@
 import requests
 from http.cookiejar import MozillaCookieJar
 from bs4 import BeautifulSoup
+from errors import CsrfTokenNotFoundError
 
 def load_cookies(session: requests.Session, filepath: str, load_from_file: bool) -> bool:
     """Load cookies from a file into a requests Session.
@@ -41,5 +42,5 @@ def get_request(session: requests.Session, url: str, **kwargs) -> requests.Respo
 def load_csrf_token(soup: BeautifulSoup) -> str:
     csrf_token = soup.select('meta[name="csrf-token"]')
     if not csrf_token:
-        raise Exception("couldn't find the token")
+        raise CsrfTokenNotFoundError
     return csrf_token[0].get('content')
