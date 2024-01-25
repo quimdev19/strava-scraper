@@ -43,7 +43,15 @@ def scraper_client() -> None:
             search = input("Insert a name: ")
             search = search.strip()
 
-            results = sc.export_search_results(search, export_to_json=export_to_file)
+            max_pages = input("Maximum number of pages: ")
+            try:
+                max_pages = int(max_pages)
+            except ValueError:
+                max_pages = 1
+
+            results = sc.export_search_results(
+                search, export_to_json=export_to_file, num_of_pages=max_pages
+            )
             pprint(results)
 
         elif option == "exit":

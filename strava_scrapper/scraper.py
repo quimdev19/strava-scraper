@@ -15,7 +15,6 @@ from utils import (
 
 from errors import NotLoggedInError
 
-
 class StravaScraper:
 
     COOKIES_PATH = "./strava_scrapper/cookies.txt"
@@ -110,21 +109,32 @@ class StravaScraper:
     def export_search_results(
         self, 
         search: str, 
+        num_of_pages: int = 1,
         export_to_json: bool = True, 
         json_filename: str = "search_results.json"
     ) -> list[dict]:
+        
+        results = []
+        
+        for num in range(0, num_of_pages):
 
-        params = {
-            "page": "1",
-            "page_uses_modern_javascript": "true",
-            "text": search.replace(" ", "+"),
-            "utf8": "✓"
-        }
+            params = {
+                "page": num + 1,
+                "page_uses_modern_javascript": "true",
+                "text": search.replace(" ", "+"),
+                "utf8": "✓"
+            }
 
-        url = f"https://www.strava.com/athletes/search"
-        response = get_request(self._session, url, params=params)
+            url = f"https://www.strava.com/athletes/search"
+            response = get_request(self._session, url, params=params)
 
-        results = retrieve_search_results(response.text)
+            page_result = retrieve_search_results(response.text)
+            if not page_result:
+                break
+
+            results.extend(page_result)
+            time.sleep(0.5)
+
         if export_to_json:
             export_to_json_file(results, f"{self._results_path}{json_filename}")
         return results
