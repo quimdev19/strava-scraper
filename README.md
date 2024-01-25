@@ -8,6 +8,7 @@ del usuario y devolver: Nombre, ubicación, descripción y url de la imagen del 
 nombre y sus IDs.
 - 3. El proyecto se debe ejecutar a través de un Dockerfile y tener control de versiones,
 preferiblemente que nos llegue en un link de github o similar.
+
 Para los puntos 1 y 2 es necesario loguearse en strava.com, idealmente mediante cookies.
 
 Puntos extra:
