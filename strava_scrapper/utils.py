@@ -1,7 +1,9 @@
 import requests
 from http.cookiejar import MozillaCookieJar
 from bs4 import BeautifulSoup
+from bs4 import Tag
 from errors import CsrfTokenNotFoundError
+from models.user import User
 
 def load_cookies(session: requests.Session, filepath: str, load_from_file: bool) -> bool:
     """Load cookies from a file into a requests Session.
@@ -44,3 +46,31 @@ def load_csrf_token(soup: BeautifulSoup) -> str:
     if not csrf_token:
         raise CsrfTokenNotFoundError
     return csrf_token[0].get('content')
+
+def load_user_data(user_id: int, element: Tag) -> User:
+
+    name = element.find("h1",{"class":"athlete-name"})
+    if name is not None:
+        name = name.get_text(strip=True)
+    
+    location = element.find("div",{"class":"location"})
+    if location is not None:
+        location = location.get_text(strip=True)
+
+    description = element.find("div",{"class":"description-content"})
+    if description is not None:
+        description = description.find("p").get_text(strip=True)
+
+    image_url = element.find("img",{"class":"avatar-img"})
+    if image_url is not None:
+        image_url = image_url.get("src")
+
+    user_data = {
+        "id": user_id,
+        "name": name,
+        "location": location,
+        "description": description,
+        "image_url": image_url
+    }
+
+    return User(**user_data)

@@ -1,14 +1,20 @@
 import requests
+import time
 from bs4 import BeautifulSoup
+from bs4 import Tag
+from typing import Any
 
 from utils import (
     load_cookies, 
     post_request, 
     get_request,
-    load_csrf_token
+    load_csrf_token,
+    load_user_data
 )
 
 from errors import NotLoggedInError
+
+from models.user import User
 
 
 class StravaScraper:
@@ -62,7 +68,6 @@ class StravaScraper:
     
     def __check_if_logged_in(self) -> bool:
         response = get_request(self._session, self.DASHBOARD_URL, allow_redirects=True)
-        print(response.url)
         if not response.url == self.ONBOARD_URL:
             raise NotLoggedInError
 
@@ -70,3 +75,22 @@ class StravaScraper:
         self._session = requests.Session()
         result = self.__load_cookies()
         self.__check_if_logged_in()
+
+    def export_users_info(self, ids: list[int]) -> list[User]:
+
+        results = []
+
+        for user_id in ids:
+
+            profile_url = f"https://www.strava.com/athletes/{user_id}"
+            response = get_request(self._session, profile_url)
+
+            soup = BeautifulSoup(response.text, 'lxml')
+            content = soup.select_one("div.profile-heading.profile.section")
+
+            user_model = load_user_data(user_id, content)
+            results.append(user_model)
+            
+            time.sleep(0.5)
+
+        return results
