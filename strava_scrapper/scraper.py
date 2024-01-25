@@ -83,7 +83,7 @@ class StravaScraper:
 
     def export_users_info(
         self, 
-        ids: list[int],
+        ids: list[str],
         export_to_json: bool = True, 
         json_filename: str = "users_info.json"
     ) -> list[dict[str, str]]:
@@ -92,8 +92,12 @@ class StravaScraper:
 
         for user_id in ids:
 
-            profile_url = f"https://www.strava.com/athletes/{user_id}"
+            profile_url = f"https://www.strava.com/athletes/{user_id.strip()}"
             response = get_request(self._session, profile_url)
+
+            # Means that the user related to this ID doesn't exist
+            if response.url == "https://www.strava.com/athletes/search":
+                continue
 
             user_model = load_user_profile_data(user_id, response.text)
             results.append(user_model)
