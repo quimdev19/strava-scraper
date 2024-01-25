@@ -68,7 +68,7 @@ class StravaScraper:
     def __check_if_logged_in(self) -> bool:
         response = get_request(self._session, self.DASHBOARD_URL, allow_redirects=True)
         if not response.url == self.ONBOARD_URL:
-            raise NotLoggedInError
+            raise NotLoggedInError("You might want to refresh the cookies and check if your login credentials are correct.")
 
     def login(self) -> None:
         self._session = requests.Session()
