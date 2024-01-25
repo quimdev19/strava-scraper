@@ -2,8 +2,6 @@ import requests
 import time
 import os
 from bs4 import BeautifulSoup
-from bs4 import Tag
-from typing import Any
 
 from utils import (
     load_cookies, 
