@@ -65,7 +65,6 @@ class StravaScraper:
             data=data
         )
         self._session.cookies.save(ignore_discard=True)
-        # return response.headers["Location"] == "https://www.strava.com/dashboard"
         return True
     
     def __check_if_logged_in(self) -> bool:
