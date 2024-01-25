@@ -9,7 +9,7 @@ from utils import (
     post_request, 
     get_request,
     load_csrf_token,
-    load_user_data
+    load_user_profile_data
 )
 
 from errors import NotLoggedInError
@@ -88,7 +88,7 @@ class StravaScraper:
             soup = BeautifulSoup(response.text, 'lxml')
             content = soup.select_one("div.profile-heading.profile.section")
 
-            user_model = load_user_data(user_id, content)
+            user_model = load_user_profile_data(user_id, content)
             results.append(user_model)
             
             time.sleep(0.5)

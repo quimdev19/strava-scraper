@@ -47,7 +47,7 @@ def load_csrf_token(soup: BeautifulSoup) -> str:
         raise CsrfTokenNotFoundError
     return csrf_token[0].get('content')
 
-def load_user_data(user_id: int, element: Tag) -> User:
+def load_user_profile_data(user_id: int, element: Tag) -> User:
 
     name = element.find("h1",{"class":"athlete-name"})
     if name is not None:
