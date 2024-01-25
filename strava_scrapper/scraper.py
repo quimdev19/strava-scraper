@@ -15,8 +15,6 @@ from utils import (
 
 from errors import NotLoggedInError
 
-from models.user import User
-
 
 class StravaScraper:
 
@@ -77,7 +75,7 @@ class StravaScraper:
         result = self.__load_cookies()
         self.__check_if_logged_in()
 
-    def export_users_info(self, ids: list[int]) -> list[User]:
+    def export_users_info(self, ids: list[int]) -> list[dict[str, str]]:
 
         results = []
 

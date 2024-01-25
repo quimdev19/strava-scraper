@@ -4,7 +4,6 @@ from http.cookiejar import MozillaCookieJar
 from bs4 import BeautifulSoup
 from bs4 import Tag
 from errors import CsrfTokenNotFoundError
-from models.user import User
 
 def load_cookies(session: requests.Session, filepath: str, load_from_file: bool) -> bool:
     """Load cookies from a file into a requests Session.
@@ -48,7 +47,7 @@ def load_csrf_token(soup: BeautifulSoup) -> str:
         raise CsrfTokenNotFoundError
     return csrf_token[0].get('content')
 
-def load_user_profile_data(user_id: int, html_content: str) -> User:
+def load_user_profile_data(user_id: int, html_content: str) -> dict[str, str]:
 
     soup = BeautifulSoup(html_content, 'lxml')
     container = soup.select_one("div.profile-heading.profile.section")
@@ -77,7 +76,7 @@ def load_user_profile_data(user_id: int, html_content: str) -> User:
         "image_url": image_url
     }
 
-    return User(**user_data)
+    return user_data
 
 def load_user_search_data(user_row: Tag) -> dict[str, Any]:
 
