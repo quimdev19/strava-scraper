@@ -38,7 +38,7 @@ class StravaScraper:
 
     def __get_session_data(self, csrf_token: str) -> dict[str, str]:
         return {
-            "utf8": "",
+            "utf8": "✓",
             "authenticity_token": csrf_token,
             "plan": "",
             "password": self._password,
@@ -94,3 +94,34 @@ class StravaScraper:
             time.sleep(0.5)
 
         return results
+
+    def export_search_results(self, search: str) -> list[dict]:
+
+        users = []
+
+        formatted_search = search.replace(" ", "+")
+
+        params = {
+            "page": "1",
+            "page_uses_modern_javascript": "true",
+            "text": formatted_search,
+            "utf8": "✓"
+        }
+
+        url = f"https://www.strava.com/athletes/search"
+        response = get_request(self._session, url, params=params)
+
+        soup = BeautifulSoup(response.text, 'lxml')
+
+        content = soup.select_one("ul.athlete-search.striped.container-fluid")
+        rows = content.find_all("div", {"class": "athlete-details"})
+        for i in rows:
+            name = i.find("a", {"class": "athlete-name-link"}).get_text(strip=True)
+            user_id = i.find("a", {"class": "athlete-name-link"}).get("data-athlete-id")
+
+            users.append({
+                "name": name,
+                "id": user_id
+            })
+
+        return users
