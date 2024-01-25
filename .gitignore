@@ -39,3 +39,6 @@ dmypy.json
 
 # cookies file
 cookies.txt
+
+# exported data dir
+results/

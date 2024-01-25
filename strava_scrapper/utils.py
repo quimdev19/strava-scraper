@@ -1,4 +1,5 @@
 import requests
+import json
 from typing import Any
 from http.cookiejar import MozillaCookieJar
 from bs4 import BeautifulSoup
@@ -87,6 +88,7 @@ def load_user_search_data(user_row: Tag) -> dict[str, Any]:
     user_id = user_row.find("a", {"class": "athlete-name-link"})
     if user_id is not None:
         user_id = user_id.get("data-athlete-id")
+        user_id = int(user_id)
 
     return {"name": name, "id": user_id }
 
@@ -104,3 +106,7 @@ def retrieve_search_results(html_content: str) -> list[dict]:
         users.append(data)
 
     return users
+
+def export_to_json_file(data: Any, file_path: str) -> None:
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)

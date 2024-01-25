@@ -1,5 +1,6 @@
 import requests
 import time
+import os
 from bs4 import BeautifulSoup
 from bs4 import Tag
 from typing import Any
@@ -10,7 +11,8 @@ from utils import (
     get_request,
     load_csrf_token,
     load_user_profile_data,
-    retrieve_search_results
+    retrieve_search_results,
+    export_to_json_file
 )
 
 from errors import NotLoggedInError
@@ -34,6 +36,10 @@ class StravaScraper:
         self._password = password
         self._load_cookies_from_file = load_cookies_from_file
         self._session = None
+        self._results_path = "./strava_scrapper/results/"
+
+        if not os.path.exists(self._results_path):
+            os.makedirs(self._results_path)
 
     def __get_session_data(self, csrf_token: str) -> dict[str, str]:
         return {
@@ -75,7 +81,12 @@ class StravaScraper:
         result = self.__load_cookies()
         self.__check_if_logged_in()
 
-    def export_users_info(self, ids: list[int]) -> list[dict[str, str]]:
+    def export_users_info(
+        self, 
+        ids: list[int],
+        export_to_json: bool = True, 
+        json_filename: str = "users_info.json"
+    ) -> list[dict[str, str]]:
 
         results = []
 
@@ -89,9 +100,17 @@ class StravaScraper:
 
             time.sleep(0.5)
 
+        if export_to_json:
+            export_to_json_file(results, f"{self._results_path}{json_filename}")
+
         return results
 
-    def export_search_results(self, search: str) -> list[dict]:
+    def export_search_results(
+        self, 
+        search: str, 
+        export_to_json: bool = True, 
+        json_filename: str = "search_results.json"
+    ) -> list[dict]:
 
         params = {
             "page": "1",
@@ -104,4 +123,6 @@ class StravaScraper:
         response = get_request(self._session, url, params=params)
 
         results = retrieve_search_results(response.text)
+        if export_to_json:
+            export_to_json_file(results, f"{self._results_path}{json_filename}")
         return results
