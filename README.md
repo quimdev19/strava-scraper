@@ -17,3 +17,7 @@ Puntos extra:
 - Documentación.
 - Buenas prácticas.
 - Exportar los resultados en un json.
+
+-----------------------------------------------
+
+Para ejecutar el proyecto, simplemente ejecuta el archivo "main.py"
