@@ -9,7 +9,8 @@ from utils import (
     post_request, 
     get_request,
     load_csrf_token,
-    load_user_profile_data
+    load_user_profile_data,
+    retrieve_search_results
 )
 
 from errors import NotLoggedInError
@@ -85,43 +86,24 @@ class StravaScraper:
             profile_url = f"https://www.strava.com/athletes/{user_id}"
             response = get_request(self._session, profile_url)
 
-            soup = BeautifulSoup(response.text, 'lxml')
-            content = soup.select_one("div.profile-heading.profile.section")
-
-            user_model = load_user_profile_data(user_id, content)
+            user_model = load_user_profile_data(user_id, response.text)
             results.append(user_model)
-            
+
             time.sleep(0.5)
 
         return results
 
     def export_search_results(self, search: str) -> list[dict]:
 
-        users = []
-
-        formatted_search = search.replace(" ", "+")
-
         params = {
             "page": "1",
             "page_uses_modern_javascript": "true",
-            "text": formatted_search,
+            "text": search.replace(" ", "+"),
             "utf8": "✓"
         }
 
         url = f"https://www.strava.com/athletes/search"
         response = get_request(self._session, url, params=params)
 
-        soup = BeautifulSoup(response.text, 'lxml')
-
-        content = soup.select_one("ul.athlete-search.striped.container-fluid")
-        rows = content.find_all("div", {"class": "athlete-details"})
-        for i in rows:
-            name = i.find("a", {"class": "athlete-name-link"}).get_text(strip=True)
-            user_id = i.find("a", {"class": "athlete-name-link"}).get("data-athlete-id")
-
-            users.append({
-                "name": name,
-                "id": user_id
-            })
-
-        return users
+        results = retrieve_search_results(response.text)
+        return results

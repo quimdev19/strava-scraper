@@ -1,4 +1,5 @@
 import requests
+from typing import Any
 from http.cookiejar import MozillaCookieJar
 from bs4 import BeautifulSoup
 from bs4 import Tag
@@ -47,21 +48,24 @@ def load_csrf_token(soup: BeautifulSoup) -> str:
         raise CsrfTokenNotFoundError
     return csrf_token[0].get('content')
 
-def load_user_profile_data(user_id: int, element: Tag) -> User:
+def load_user_profile_data(user_id: int, html_content: str) -> User:
 
-    name = element.find("h1",{"class":"athlete-name"})
+    soup = BeautifulSoup(html_content, 'lxml')
+    container = soup.select_one("div.profile-heading.profile.section")
+
+    name = container.find("h1",{"class":"athlete-name"})
     if name is not None:
         name = name.get_text(strip=True)
     
-    location = element.find("div",{"class":"location"})
+    location = container.find("div",{"class":"location"})
     if location is not None:
         location = location.get_text(strip=True)
 
-    description = element.find("div",{"class":"description-content"})
+    description = container.find("div",{"class":"description-content"})
     if description is not None:
         description = description.find("p").get_text(strip=True)
 
-    image_url = element.find("img",{"class":"avatar-img"})
+    image_url = container.find("img",{"class":"avatar-img"})
     if image_url is not None:
         image_url = image_url.get("src")
 
@@ -74,3 +78,30 @@ def load_user_profile_data(user_id: int, element: Tag) -> User:
     }
 
     return User(**user_data)
+
+def load_user_search_data(user_row: Tag) -> dict[str, Any]:
+
+    name = user_row.find("a", {"class": "athlete-name-link"})
+    if name is not None:
+        name = name.get_text(strip=True)
+
+    user_id = user_row.find("a", {"class": "athlete-name-link"})
+    if user_id is not None:
+        user_id = user_id.get("data-athlete-id")
+
+    return {"name": name, "id": user_id }
+
+def retrieve_search_results(html_content: str) -> list[dict]:
+
+    users = []
+
+    soup = BeautifulSoup(html_content, 'lxml')
+    container = soup.select_one("ul.athlete-search.striped.container-fluid")
+
+    rows = container.find_all("div", {"class": "athlete-details"})
+    for row in rows:
+
+        data = load_user_search_data(row)
+        users.append(data)
+
+    return users
